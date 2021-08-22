@@ -1,2 +1,21 @@
 # OptExplain-Silas
-Re-implementation of OptExplain based on Silas models
+
+Re-implementation of [OptExplain](https://arxiv.org/abs/2103.02191) ([code](https://github.com/GreeenZhang/OptExplain)) based on Silas models
+
+## Running OptExplain
+
+1. Clone this repository and `cd` into it.
+
+2. Install dependencies:
+```shell
+pip install -r requirements.txt
+```
+
+3. Run `OptExplain.py` with your Silas model path, test data, and Silas prediction file on this test data:
+```shell
+python OptExplain.py -m model_path -t test_file -p prediction_file
+```
+
+### Outputs
+
+OptExplain will print the results as well as save them as a file in `./explanation/`.

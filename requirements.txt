@@ -1,0 +1,5 @@
+numpy
+pandas
+z3-solver
+scikit-learn
+matplotlib
