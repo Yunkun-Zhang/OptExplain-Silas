@@ -2,6 +2,7 @@ import json
 import os
 import pandas as pd
 import numpy as np
+from typing import Union, List, Dict
 
 __version__ = '0.8.7'
 
@@ -9,19 +10,22 @@ __version__ = '0.8.7'
 class Feature:
     """Process numerical and nominal features."""
 
-    def __init__(self, f):
+    def __init__(self, f: Union[float, List[bool]]) -> None:
         self.f = f
         self.type = 'numeric' if isinstance(f, (int, float)) else 'nominal'
 
     def __repr__(self):
         return str(self.f)
 
-    def satisfy(self, f, values=None):
+    def satisfy(self, f: Union[float, str], values: List[str] = None) -> bool:
         """Tests if the input satisfies the feature.
 
-        :param f: a feature value
-        :param values: a list of nominal feature values
-        :return f <= feature or f ∈ feature
+        Args:
+          f: a feature value
+          values: a list of nominal feature values
+
+        Returns:
+          f <= feature or f ∈ feature
         """
         if self.type == 'numeric':
             return f <= self.f
@@ -29,14 +33,14 @@ class Feature:
             return self.f[values.index(f)]
 
 
-def add_f(f1, f2):
+def add_f(f1: Feature, f2: Feature) -> Feature:
     """Max of numerical features. Union of nominal features."""
     if f1.type == f2.type == 'numeric':
         return Feature(max(f1.f, f2.f))
     return Feature(np.bitwise_or(f1.f, f2.f))
 
 
-def sub_f(f1, f2):
+def sub_f(f1: Feature, f2: Feature) -> Feature:
     """Min of numerical features. Intersection of nominal features."""
     if f1.type == f2.type == 'numeric':
         return Feature(min(f1.f, f2.f))
@@ -48,16 +52,16 @@ class DT:
 
     def __init__(self):
         self.oob_score = 0
-        self.count = 0
-        self.feature = []
-        self.rules = []
+        self.count = 0              # number of nodes
+        self.feature = []           # feature indices at each node
+        self.rules = []             # leaf paths
         self.children_left = []
         self.children_right = []
-        self.value = []
-        self.ig = []
-        self.threshold = []
+        self.value = []             # number of samples at each node
+        self.ig = []                # information gain at each node
+        self.threshold = []         # feature threshold or partition at each node
 
-    def initialize(self, weight, dic):
+    def initialize(self, weight: float, dic: Dict) -> None:
         """Initialize a decision tree with Silas-generated .json file."""
         self.__init__()
         self.oob_score = weight
@@ -91,14 +95,14 @@ class DT:
 
         dfs(dic)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> List[int]:
         return self.rules[item]
 
 
 class RFC:
     """Random forest classifier."""
 
-    def __init__(self, model_path='', pred_file='predictions.csv'):
+    def __init__(self, model_path='', pred_file='predictions.csv') -> None:
         """Build a random forest classifier.
 
         :param model_path: path to Silas model
@@ -124,13 +128,14 @@ class RFC:
         self.n_classes_ = len(summary['output-labels'])
         self.n_features_ = len(summary['template'])
         self.n_outputs_ = 1
-        self.trees_ = summary['trees']
+        self.trees_dic = summary['trees']
+        self.trees_ = []
         self.trees_oob_scores = []
 
         self._set_oob_scores()  # read tree oob scores
         self._build_trees()  # build decision trees
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> DT:
         return self.trees_[item]
 
     def _set_oob_scores(self):
@@ -139,16 +144,15 @@ class RFC:
             self.trees_oob_scores.append(tree['weight'])
 
     def _build_trees(self):
-        trees = []
-        for tree in self.trees_:
+        for tree in self.trees_dic:
             with open(os.path.join(self.model_path, tree['path']), 'rb') as f:
                 d = json.load(f)
             dt = DT()
             dt.initialize(tree['weight'], d)
-            trees.append(dt)
-        self.trees_ = trees
+            self.trees_.append(dt)
 
     def predict_proba(self):
+        """Predict probability of each class for each input instance."""
         prob = pd.read_csv(self.pred_file).values.tolist()
         return np.array(prob)
 

@@ -9,8 +9,8 @@ class FormulaeEstimator(object):
         self.group_weights = self._z3processor.group_weights
         self._n_features = self._z3processor.n_features
         self.groups_signature = [t[0] for t in self._groups]
-        self.groups_formula = []  # store formula combined into groups
-                                  # each element with shape (2, n_features)
+        self.groups_formula = []    # store formula combined into groups
+                                    # each element with shape (2, n_features)
         self.visited = []
         self.sat_group = []
         self._conjunction = conjunction
@@ -68,15 +68,16 @@ class FormulaeEstimator(object):
                 text = ''
                 for i in range(self._n_features):
                     if self.visited[index][0][i] == 1:
-                        text += f'(feature_{i} <= {formula[0][i]} Λ '
+                        text += f'(feature_{i} <= {formula[0][i]}) Λ '
                     if self.visited[index][1][i] == 1:
-                        text += f'(feature_{i} > {formula[1][i]} Λ '
-                print(f'Group{index}: |{sum(self.group_weights[index])} samples | {len(self._groups[index][1])} '
-                      f'rules | {self._groups[index][0]}')
-                print(text[:-2])
-                file.write('Group' + str(index) + ': |' + str(sum(self.group_weights[index])) + 'samples| ' + str(len(
-                    self._groups[index][1])) + 'rules| ' + str(self._groups[index][0]) + '\n')
-                file.write(text[:-2] + '\n')
+                        text += f'(feature_{i} > {formula[1][i]}) Λ '
+                text = text[:-2]
+                title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
+                        f'{len(self._groups[index][1]):>2} rules | {self._groups[index][0]}'
+                print(title)
+                print(text)
+                file.write(title + '\n')
+                file.write(text + '\n')
             # print("signatures:", self.groups_signature)
         else:
             self._get_formulae()
@@ -85,7 +86,7 @@ class FormulaeEstimator(object):
             for index, group in enumerate(self._groups):
                 text = ''
                 for r, rule in enumerate(group[1]):
-                    text += f'\t {self.group_weights[index][r]} samples\t'
+                    text += f'{self.group_weights[index][r]:>15.0f} samples\t'
                     for i in range(self._n_features):
                         if o_visited[rule][0][i] == 1:
                             text += f'(feature_{i} <= {o_formulae[rule][0][i]}) Λ '
@@ -95,11 +96,11 @@ class FormulaeEstimator(object):
                             # self.scale += 1
                     text = text[:-3] + '\n'
 
-                print(f'Group{index}: |{sum(self.group_weights[index])} samples | {len(self._groups[index][1])} '
-                      f'rules | {self._groups[index][0]}')
+                title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
+                        f'{len(self._groups[index][1]):>2} rules | {self._groups[index][0]}'
+                print(title)
                 print(text)
-                file.write('Group' + str(index) + ': |' + str(sum(self.group_weights[index])) + 'samples| ' + str(len(
-                    self._groups[index][1])) + 'rules| ' + str(self._groups[index][0]) + '\n')
+                file.write(title + '\n')
                 file.write(text + '\n')
             print('conjuncts num:', self.scale)
             file.write("conjuncts num:" + str(self.scale) + '\n')

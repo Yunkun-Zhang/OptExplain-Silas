@@ -99,6 +99,7 @@ class MainProcess(object):
         self._file.write('------------ P S O -------------\n')
         ex = Extractor(self._clf)
         ex.extract_forest_paths()
+        ex.count_quality()
 
         # ex.count_quality()
         #
@@ -129,7 +130,7 @@ class MainProcess(object):
         np.random.seed(10)
         pop = np.zeros([4, sizepop])
         pop[0] = np.random.uniform(0.1, 1, (1, sizepop))  # phi
-        pop[1] = np.random.uniform(0.1, 1, (1, sizepop))  # theta
+        pop[1] = np.random.uniform(0.1, 0.2, (1, sizepop))  # theta
         pop[2] = np.random.uniform(0, 1, (1, sizepop))    # psi
         pop[3] = np.random.uniform(1, 30, (1, sizepop))   # k
         if self._tailor is False:
@@ -154,10 +155,9 @@ class MainProcess(object):
         z_best = pop[:, i]          # best parameters
         fitness_gbest = fitness     # best fitness of each particle
         fitness_zbest = fitness[i]  # best fitness
-        print(0, '\t', i, '\t', pop[:, i], '\t', offset[i] / sample_num, r_num[i], 'fitness:', fitness[i])
-        self._file.write(
-            '0:\t{}\t{}\t{:.2f}\t{} fitness: {:.4f}\n'.format(i, pop[:, i], (offset[i] / sample_num), r_num[i],
-                                                              fitness[i]))
+        text = f'{0:<4}{i:<4}{pop[:, i]}\t{offset[i] / sample_num:>11.8f}  {r_num[i]:<2}  fitness: {fitness[i]:.8f}'
+        print(text)
+        self._file.write(text + '\n')
 
         record = np.zeros(max_gen)  # store best fitness
         for t in range(max_gen):
@@ -197,10 +197,9 @@ class MainProcess(object):
             # best particle
             j = np.argmax(fitness)
 
-            print(t + 1, '\t', j, '\t', pop[:, j], '\t', offset[j] / sample_num, r_num[j], 'fitness:', fitness[j])
-            self._file.write(
-                '{}:\t{}\t{}\t{:.2f}\t{} fitness: {:.2f}'.format(t + 1, j, pop[:, j], offset[j] / sample_num, r_num[j],
-                                                                 fitness[j]))
+            text = f'{t + 1:<4}{j:<4}{pop[:, j]}\t{offset[j] / sample_num:>11.8f}  {r_num[j]:<2}  fitness: {fitness[j]:.8f}'
+            print(text)
+            self._file.write(text)
             if fitness[j] > fitness_zbest:
                 z_best = pop[:, j]
                 fitness_zbest = fitness[j]
@@ -246,10 +245,10 @@ class MainProcess(object):
 
         ex.rule_filter()
 
-        print('max_rule', ex.max_rule, 'max_node', ex.max_node)
-        print('min_rule', ex.min_rule, 'min_node', ex.min_node)
+        print(f'max_rule {ex.max_rule:>7.5f} max_node{ex.max_node:>7.5f}')
+        print(f'max_rule {ex.min_rule:>7.5f} max_node{ex.min_node:>7.5f}')
         end1 = time()
-        print("EX Running time: %s seconds" % (end1 - start1))
+        print(f"EX Running time: {end1 - start1} seconds")
 
         print("Original #rules:", ex.n_original_leaves_num)
         print("Original scale:", ex.scale)
@@ -311,29 +310,29 @@ class MainProcess(object):
         efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1], pos_label=label)
         ex_auc = auc(efpr, etpr)
 
-        print('sample size:\t', len(self._y_test))
-        self._file.write('sample size:\t{}\n'.format(len(self._y_test)))
+        print(f'sample size:     {len(self._y_test)}')
+        self._file.write(f'sample size:     {len(self._y_test)}\n')
 
-        print('RF accuracy:\t', RF_accuracy)
-        self._file.write('RF accuracy:\t{}\n'.format(RF_accuracy))
+        print(f'RF accuracy:     {RF_accuracy}')
+        self._file.write(f'RF accuracy:     {RF_accuracy}\n')
 
-        print('RF AUC:\t\t\t', ori_auc)
-        self._file.write('RF AUC:\t\t\t{:.2f}\n'.format(ori_auc))
+        print(f'RF AUC:          {ori_auc}')
+        self._file.write(f'RF AUC:          {ori_auc:.2f}\n')
 
-        print('EX accuracy:\t', EX_accuracy)
-        self._file.write('EX accuracy:\t{}\n'.format(EX_accuracy))
+        print(f'EX accuracy:     {EX_accuracy}')
+        self._file.write(f'EX accuracy:     {EX_accuracy}\n')
 
-        print('EX AUC:\t\t\t', ex_auc)
-        self._file.write('EX AUC:\t\t\t{:.2f}\n'.format(ex_auc))
+        print(f'EX AUC:          {ex_auc}')
+        self._file.write(f'EX AUC:          {ex_auc:.2f}\n')
 
-        print('Coverage:\t\t', (len(self._y_test) - no_ans) / len(self._y_test))
-        self._file.write('Coverage:\t\t{}\n'.format((len(self._y_test) - no_ans) / len(self._y_test)))
+        print(f'Coverage:        {(len(self._y_test) - no_ans) / len(self._y_test)}')
+        self._file.write(f'Coverage:        {(len(self._y_test) - no_ans) / len(self._y_test)}\n')
 
-        print('Overlap:\t\t', overlap / len(self._y_test))
-        self._file.write('Overlap:\t\t{}\n'.format(overlap / len(self._y_test)))
+        print(f'Overlap:         {overlap / len(self._y_test)}')
+        self._file.write(f'Overlap:         {overlap / len(self._y_test)}\n')
 
-        print('*Performance:\t', performance)
-        self._file.write('*Performance:\t{}\n'.format(performance))
+        print(f'*Performance:    {performance}')
+        self._file.write(f'*Performance:    {performance}\n')
 
         # plot the results
         if auc_plot is True:
@@ -355,7 +354,7 @@ def func_parallel(extractor, _rf_res, maxsat_on, conjunction, classes, X_test, q
 
     t0 = time()
     ex = copy.deepcopy(extractor)
-    ex.count_quality()
+    # ex.count_quality()
     t1 = time()  # Plan B
 
     # set extractor parameters

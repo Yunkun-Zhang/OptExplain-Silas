@@ -9,11 +9,11 @@ from Main_Process import MainProcess
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model-path', default='model/diabetes',
+    parser.add_argument('-m', '--model-path', default='model/flights',
                         help='root of your Silas model')
-    parser.add_argument('-t', '--test-file', default='tests/clean-diabetes_test.csv',
+    parser.add_argument('-t', '--test-file', default='tests/clean-flights_test.csv',
                         help='path to your test file')
-    parser.add_argument('-p', '--prediction-file', default='tests/predictions_diabetes.csv',
+    parser.add_argument('-p', '--prediction-file', default='tests/predictions_flights.csv',
                         help='path to Silas-generated predictions.csv')
     parser.add_argument('--number-of-trees', type=int, default=100)
     parser.add_argument('--max-depth', type=int, default=10)
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     print('RF...')
     clf = RFC(model_path, pf)
-    print(accuracy_score(y_test, clf.predict()))
+    print('RF acc:', accuracy_score(y_test, clf.predict()))
 
     # output
     file_num = 1
