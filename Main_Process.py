@@ -95,8 +95,8 @@ class MainProcess(object):
     def pso(self):
         start_pso = time()
         np.set_printoptions(precision=3)
-        print('------------ P S O -------------')
-        self._file.write('------------ P S O -------------\n')
+        print('---------------- P S O -----------------')
+        self._file.write('---------------- P S O -----------------\n')
         ex = Extractor(self._clf)
         ex.extract_forest_paths()
         ex.count_quality()
@@ -110,7 +110,7 @@ class MainProcess(object):
         sample_num = len(self._y_test) if self.fitness_func == 'Opt' else 1
         w_max = 0.9
         w_min = 0.4
-        c1, c2 = 1.6, 1.6  # learn factors
+        c1, c2 = 1.6, 1.6  # learning factors
         max_gen = self._generation
         sizepop = self._scale
 
@@ -184,7 +184,7 @@ class MainProcess(object):
             offset, r_num = self.pso_function_parallel(ex, pop, RF_res)
 
             # compute fitness
-            if self.fitness_func == 'Pro':  # 计算适应度
+            if self.fitness_func == 'Pro':
                 fitness = self.pro_fitness(offset, r_num)
             else:
                 fitness = self.opt_fitness(offset, r_num)
@@ -208,12 +208,12 @@ class MainProcess(object):
             self._file.write('\n')
             record[t] = fitness_zbest  # store best fitness
 
-        print('optimal parameters', z_best)
-        self._file.write('optimal parameters: {}\n'.format(z_best))
+        print(f'Optimal parameters: {z_best}')
+        self._file.write('Optimal parameters: {}\n'.format(z_best))
 
         end_pso = time()
-        print('pso time:', end_pso - start_pso)
-        self._file.write('pso time: {}\n\n'.format(end_pso - start_pso))
+        print(f'PSO time: {end_pso - start_pso}\n')
+        self._file.write('PSO time: {}\n\n'.format(end_pso - start_pso))
 
         return z_best
 
@@ -232,8 +232,8 @@ class MainProcess(object):
         return fitness
 
     def explain(self, param, label='', auc_plot=False):
-        print('------------ Explanation -------------')
-        self._file.write('------------ Explanation -------------\n')
+        print('---------------- Explanation -----------------')
+        self._file.write('---------------- Explanation -----------------\n')
         phi = param[0]
         theta = param[1]
         psi = param[2]
@@ -245,8 +245,8 @@ class MainProcess(object):
 
         ex.rule_filter()
 
-        print(f'max_rule {ex.max_rule:>7.5f} max_node{ex.max_node:>7.5f}')
-        print(f'max_rule {ex.min_rule:>7.5f} max_node{ex.min_node:>7.5f}')
+        print(f'max_rule {ex.max_rule:>8.6f}  max_node {ex.max_node:>8.6f}')
+        print(f'max_rule {ex.min_rule:>8.6f}  max_node {ex.min_node:>8.6f}')
         end1 = time()
         print(f"EX Running time: {end1 - start1} seconds")
 
@@ -267,13 +267,13 @@ class MainProcess(object):
             print(text)
             self._file.write(text)
         else:
-            print('no MAX-SAT')
-            self._file.write('/no MAX-SAT\n')
+            print('No MAX-SAT')
+            self._file.write('No MAX-SAT\n')
         sat.run_filter()
         end2 = time()
         print(f"MAX-SAT running time: {end2 - start2} seconds")
 
-        print('classes:', self._clf.classes_)
+        print('Classes:', self._clf.classes_)
 
         # get formulae
         start3 = time()
@@ -281,8 +281,8 @@ class MainProcess(object):
         f.get_formulae_text(self._file)
 
         # evaluation
-        print('\n------------ Performance -------------')
-        self._file.write('\n------------ Performance -------------\n')
+        print('\n---------------- Performance -----------------')
+        self._file.write('\n---------------- Performance -----------------\n')
         c_ans = self._clf.predict()
         ans = f.classify_samples(self._X_test)
         end3 = time()
@@ -310,8 +310,8 @@ class MainProcess(object):
         efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1], pos_label=label)
         ex_auc = auc(efpr, etpr)
 
-        print(f'sample size:     {len(self._y_test)}')
-        self._file.write(f'sample size:     {len(self._y_test)}\n')
+        print(f'Sample size:     {len(self._y_test)}')
+        self._file.write(f'Sample size:     {len(self._y_test)}\n')
 
         print(f'RF accuracy:     {RF_accuracy}')
         self._file.write(f'RF accuracy:     {RF_accuracy}\n')

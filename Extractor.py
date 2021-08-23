@@ -8,12 +8,11 @@ class Extractor(object):
         """Build a rule extractor.
 
         Args:
-          estimators: random forest
-          phi: rule filter threshold
-          theta: node filter threshold
-          psi: leaf merger to create class signature
+          estimators: Random forest.
+          phi: Rule filter threshold.
+          theta: Node filter threshold.
+          psi: Leaf merger to create class signature.
         """
-
         self._estimators = estimators       # random forest
         self._forest_paths = []             # all forest paths
         self.scale = 0
@@ -46,6 +45,7 @@ class Extractor(object):
         self._psi = psi
 
     def opt_set_quality(self, quality, ig):
+        """Set rule quality and node information gain."""
         self._quality = quality
         self._ig = ig
 
@@ -68,19 +68,18 @@ class Extractor(object):
 
     def count_quality(self):
         _n_classes = self._estimators.n_classes_
-        for index, tree in enumerate(self._estimators.trees_):
+        for index, tree in enumerate(self._estimators):
             acc = self._estimators.trees_oob_scores[index]
-            _tree = self._estimators[index]
 
             # rule quality
-            rule_quality = [(1 - (_tree.ig[rule[-1]] / math.log(_n_classes, 2))) * acc for rule in _tree]
+            rule_quality = [(1 - (tree.ig[rule[-1]] / math.log(_n_classes, 2))) * acc for rule in tree]
             self.n_original_leaves_num += len(rule_quality)
             self.max_rule = max(rule_quality)
             self.min_rule = min(rule_quality)
 
             # node quality
-            node_quality = [_tree.ig[node] if _tree.children_left[node] != -1 or _tree.children_right[node] != -1
-                            else -1 for node in range(_tree.count)]
+            node_quality = [tree.ig[node] if tree.children_left[node] != -1 or tree.children_right[node] != -1
+                            else -1 for node in range(tree.count)]
             masked = [nq for nq in node_quality if nq != -1]
             self.max_node = max(masked)
             self.min_node = min(masked)
@@ -120,7 +119,7 @@ class Extractor(object):
         for k, node in enumerate(rule[:-1]):
             ig = self._ig[index][node]
 
-            if ig >= self._theta:       # node filter: ig >= theta
+            if ig >= self._theta:  # node filter: ig >= theta
                 fi = _feature[node]
                 if _tree.children_left[node] == rule[k + 1]:
                     if visited[0, fi] == 0:

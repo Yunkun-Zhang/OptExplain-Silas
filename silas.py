@@ -18,14 +18,14 @@ class Feature:
         return str(self.f)
 
     def satisfy(self, f: Union[float, str], values: List[str] = None) -> bool:
-        """Tests if the input satisfies the feature.
+        """Test if the input satisfies the feature.
 
         Args:
-          f: a feature value
-          values: a list of nominal feature values
+          f: A float or a partition.
+          values: List of nominal feature values.
 
         Returns:
-          f <= feature or f ∈ feature
+          f <= feature or f ∈ feature.
         """
         if self.type == 'numeric':
             return f <= self.f
@@ -34,14 +34,14 @@ class Feature:
 
 
 def add_f(f1: Feature, f2: Feature) -> Feature:
-    """Max of numerical features. Union of nominal features."""
+    """Compute maximum of numerical features or union of nominal features."""
     if f1.type == f2.type == 'numeric':
         return Feature(max(f1.f, f2.f))
     return Feature(np.bitwise_or(f1.f, f2.f))
 
 
 def sub_f(f1: Feature, f2: Feature) -> Feature:
-    """Min of numerical features. Intersection of nominal features."""
+    """Compute minimum of numerical features or intersection of nominal features."""
     if f1.type == f2.type == 'numeric':
         return Feature(min(f1.f, f2.f))
     return Feature(np.bitwise_and(f1.f, f2.f))
@@ -105,8 +105,9 @@ class RFC:
     def __init__(self, model_path='', pred_file='predictions.csv') -> None:
         """Build a random forest classifier.
 
-        :param model_path: path to Silas model
-        :param pred_file: path of Silas prediction file (.csv)
+        Args:
+          model_path: Path to Silas model.
+          pred_file: Path of Silas prediction file.
         """
         self.model_path = model_path
         self.pred_file = pred_file
@@ -118,7 +119,7 @@ class RFC:
 
         dic = {f['name']: f for f in metadata['attributes']}
         self.nominal_features = [dic[f['attribute-name']]['values'] if 'values' in f else None
-                                 for f in metadata['features']]  # for nominal feature satisfy method
+                                 for f in metadata['features']]  # for nominal feature method 'satisfy'
         self.n_estimators = summary['size']
         self.classes_ = summary['output-labels']
 
@@ -139,13 +140,13 @@ class RFC:
         return self.trees_[item]
 
     def _set_oob_scores(self):
-        for tree in self.trees_:
+        for tree in self.trees_dic:
             # in Silas v0.8.7 this is the oob score
             self.trees_oob_scores.append(tree['weight'])
 
     def _build_trees(self):
         for tree in self.trees_dic:
-            with open(os.path.join(self.model_path, tree['path']), 'rb') as f:
+            with open(os.path.join(self.model_path, tree['path']), 'r') as f:
                 d = json.load(f)
             dt = DT()
             dt.initialize(tree['weight'], d)

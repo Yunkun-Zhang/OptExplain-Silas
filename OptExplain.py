@@ -1,19 +1,19 @@
 import os
-from silas import RFC
-from sklearn.metrics import accuracy_score
+import argparse
 import numpy as np
 import pandas as pd
-import argparse
+from sklearn.metrics import accuracy_score
+from silas import RFC
 from Main_Process import MainProcess
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model-path', default='model/flights',
+    parser.add_argument('-m', '--model-path', default='model/diabetes/',
                         help='root of your Silas model')
-    parser.add_argument('-t', '--test-file', default='tests/clean-flights_test.csv',
+    parser.add_argument('-t', '--test-file', default='tests/clean-diabetes_test.csv',
                         help='path to your test file')
-    parser.add_argument('-p', '--prediction-file', default='tests/predictions_flights.csv',
+    parser.add_argument('-p', '--prediction-file', default='tests/predictions_diabetes.csv',
                         help='path to Silas-generated predictions.csv')
     parser.add_argument('--number-of-trees', type=int, default=100)
     parser.add_argument('--max-depth', type=int, default=10)
