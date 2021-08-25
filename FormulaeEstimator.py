@@ -22,7 +22,7 @@ class FormulaeEstimator(object):
         if self._conjunction is True:
             for group in self._groups:
                 rules = group[1]
-                formula = np.zeros([2, self._n_features])
+                formula = [[None for _ in range(self._n_features)] for _ in range(2)]
                 visited = np.zeros([2, self._n_features])
                 n = 1
                 for rule in rules:

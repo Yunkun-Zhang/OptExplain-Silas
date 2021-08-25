@@ -10,41 +10,41 @@ __version__ = '0.8.7'
 class Feature:
     """Process numerical and nominal features."""
 
-    def __init__(self, f: Union[float, List[bool]]) -> None:
-        self.f = f
-        self.type = 'numeric' if isinstance(f, (int, float)) else 'nominal'
+    def __init__(self, value: Union[float, List[bool]]) -> None:
+        self.value = value
+        self.type = 'numeric' if isinstance(value, (int, float)) else 'nominal'
 
     def __repr__(self):
-        return str(self.f)
+        return str(self.value)
 
     def satisfy(self, f: Union[float, str], values: List[str] = None) -> bool:
         """Test if the input satisfies the feature.
 
         Args:
-          f: A float or a partition.
+          f: A feature value.
           values: List of nominal feature values.
 
         Returns:
           f <= feature or f ∈ feature.
         """
         if self.type == 'numeric':
-            return f <= self.f
+            return f <= self.value
         else:
-            return self.f[values.index(f)]
+            return self.value[values.index(f)]
 
 
 def add_f(f1: Feature, f2: Feature) -> Feature:
     """Compute maximum of numerical features or union of nominal features."""
     if f1.type == f2.type == 'numeric':
-        return Feature(max(f1.f, f2.f))
-    return Feature(np.bitwise_or(f1.f, f2.f))
+        return Feature(max(f1.value, f2.value))
+    return Feature(np.bitwise_or(f1.value, f2.value))
 
 
 def sub_f(f1: Feature, f2: Feature) -> Feature:
     """Compute minimum of numerical features or intersection of nominal features."""
     if f1.type == f2.type == 'numeric':
-        return Feature(min(f1.f, f2.f))
-    return Feature(np.bitwise_and(f1.f, f2.f))
+        return Feature(min(f1.value, f2.value))
+    return Feature(np.bitwise_and(f1.value, f2.value))
 
 
 class DT:

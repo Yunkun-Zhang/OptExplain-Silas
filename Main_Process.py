@@ -265,13 +265,13 @@ class MainProcess(object):
             sat.maxsat()
             text = f'#rules after MAX-SAT: {sat.n_rules_after_max}, after rule-filter: {sat.n_rules_after_filter}\n'
             print(text)
-            self._file.write(text)
+            self._file.write(text + '\n')
         else:
             print('No MAX-SAT')
             self._file.write('No MAX-SAT\n')
         sat.run_filter()
         end2 = time()
-        print(f"MAX-SAT running time: {end2 - start2} seconds")
+        print(f"SAT running time: {end2 - start2} seconds\n")
 
         print('Classes:', self._clf.classes_)
 

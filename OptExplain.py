@@ -15,23 +15,33 @@ if __name__ == "__main__":
                         help='path to your test file')
     parser.add_argument('-p', '--prediction-file', default='tests/predictions_diabetes.csv',
                         help='path to Silas-generated predictions.csv')
-    parser.add_argument('--number-of-trees', type=int, default=100)
-    parser.add_argument('--max-depth', type=int, default=10)
+    parser.add_argument('--generation', type=int, default=20,
+                        help='number of PSO iterations')
+    parser.add_argument('--scale', type=int, default=20,
+                        help='number of PSO particles')
+    parser.add_argument('--acc-weight', type=float, default=0.5,
+                        help='proportion of current acc in fitness computation')
+    parser.add_argument('--conjunction', action='store_true',
+                        help='whether to output conjunction')
+    parser.add_argument('--max-sat', action='store_true',
+                        help='whether to apply MAX-SAT')
+    parser.add_argument('--no-tailor', action='store_true',
+                        help='not to use size filter')
     args = vars(parser.parse_args())
 
     model_path = args['model_path']
     test_file = args['test_file']
     pf = args['prediction_file']
 
-    n_estimators = args['number_of_trees']  # number of trees
-    max_depth = args['max_depth']  # max-depth of each tree
+    # n_estimators = 100  # number of trees
+    # max_depth = 10  # max-depth of each tree
 
-    generation = 20  # number of iterations
-    scale = 20  # number of particles
-    acc_weight = 0.5
-    conjunction = False
-    maxsat_on = False
-    size_filter = True
+    generation = args['generation']
+    scale = args['scale']
+    acc_weight = args['acc_weight']
+    conjunction = args['conjunction']
+    maxsat_on = args['max_sat']
+    size_filter = not args['no_tailor']
 
     # read the test data
     test_data = pd.read_csv(test_file)
@@ -49,7 +59,7 @@ if __name__ == "__main__":
     while os.path.exists(f'explanation/{file_num}.txt') is True:
         file_num += 1
     file = open(f'explanation/{file_num}.txt', 'w')
-    file.write(f'n_estimators = {n_estimators}\tmax_depth = {max_depth}\n')
+    # file.write(f'n_estimators = {n_estimators}\tmax_depth = {max_depth}\n')
     file.write('generation = {}\tscale = {}\tacc_weight = {}\tmaxsat = {}\ttailor = {}\n'.
                format(generation, scale, acc_weight, maxsat_on, size_filter))
     print('explain...')
