@@ -61,7 +61,7 @@ class DT:
         self.ig = []                # information gain at each node
         self.threshold = []         # feature threshold or partition at each node
 
-    def initialize(self, weight: float, dic: Dict) -> None:
+    def initialize(self, weight: float, dic: Dict, index: List[int]) -> None:
         """Initialize a decision tree with Silas-generated .json file."""
         self.__init__()
         self.oob_score = weight
@@ -83,7 +83,7 @@ class DT:
                 prob = value / value.sum()
                 self.ig[number] = -(prob * np.log2(prob)).sum() if prob[0] != 0 and prob[1] != 0 else 0
             else:
-                self.feature[number] = d['featureIndex']
+                self.feature[number] = index[d['featureIndex']]
                 self.children_left[number], value1 = dfs(d['left'])
                 self.children_right[number], value2 = dfs(d['right'])
                 value = value1 + value2
@@ -117,39 +117,44 @@ class RFC:
         with open(os.path.join(model_path, 'metadata.json'), 'r') as f:
             metadata = json.load(f)
 
+        # for nominal feature method 'satisfy'
         dic = {f['name']: f for f in metadata['attributes']}
-        self.nominal_features = [dic[f['attribute-name']]['values'] if 'values' in f else None
-                                 for f in metadata['features']]  # for nominal feature method 'satisfy'
-        self.n_estimators = summary['size']
-        self.classes_ = summary['output-labels']
+        self.nominal_features = [dic[f['attribute-name']]['values'] if 'values' in dic[f['attribute-name']]
+                                 else None for f in metadata['features']]
 
+        # features are ordered according to metadata / test set
         features = [a['feature-name'] for a in metadata['features']]
         self.features_ = features[:-1]
         self.output_feature_ = features[-1]
+
+        # revise featureIndex in tree nodes
+        self.feature_indices = [features.index(f) for f in summary['template']]
+
+        self.n_estimators = summary['size']
+        self.classes_ = summary['output-labels']
         self.n_classes_ = len(summary['output-labels'])
         self.n_features_ = len(summary['template'])
         self.n_outputs_ = 1
-        self.trees_dic = summary['trees']
         self.trees_ = []
         self.trees_oob_scores = []
 
-        self._set_oob_scores()  # read tree oob scores
-        self._build_trees()  # build decision trees
+        self._set_oob_scores(summary['trees'])  # read tree oob scores
+        self._build_trees(summary['trees'])  # build decision trees
 
     def __getitem__(self, item: int) -> DT:
         return self.trees_[item]
 
-    def _set_oob_scores(self):
-        for tree in self.trees_dic:
+    def _set_oob_scores(self, trees_dic):
+        for tree in trees_dic:
             # in Silas v0.8.7 this is the oob score
             self.trees_oob_scores.append(tree['weight'])
 
-    def _build_trees(self):
-        for tree in self.trees_dic:
+    def _build_trees(self, trees_dic):
+        for tree in trees_dic:
             with open(os.path.join(self.model_path, tree['path']), 'r') as f:
                 d = json.load(f)
             dt = DT()
-            dt.initialize(tree['weight'], d)
+            dt.initialize(tree['weight'], d, self.feature_indices)
             self.trees_.append(dt)
 
     def predict_proba(self):

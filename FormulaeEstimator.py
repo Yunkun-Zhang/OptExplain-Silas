@@ -68,9 +68,9 @@ class FormulaeEstimator(object):
                 text = ''
                 for i in range(self._n_features):
                     if self.visited[index][0][i] == 1:
-                        text += f'(feature_{i} <= {formula[0][i]}) Λ '
+                        text += f'(feature_{i} <= {formula[0][i]}) ∧ '
                     if self.visited[index][1][i] == 1:
-                        text += f'(feature_{i} > {formula[1][i]}) Λ '
+                        text += f'(feature_{i} > {formula[1][i]}) ∧ '
                 text = text[:-2]
                 title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
                         f'{len(self._groups[index][1]):>2} rules | {self._groups[index][0]}'
@@ -89,10 +89,10 @@ class FormulaeEstimator(object):
                     text += f'{self.group_weights[index][r]:>15.0f} samples\t'
                     for i in range(self._n_features):
                         if o_visited[rule][0][i] == 1:
-                            text += f'(feature_{i} <= {o_formulae[rule][0][i]}) Λ '
+                            text += f'(feature_{i} <= {o_formulae[rule][0][i]}) ∧ '
                             # self.scale += 1
                         if o_visited[rule][1][i] == 1:
-                            text += f'(feature_{i} > {o_formulae[rule][1][i]}) Λ '
+                            text += f'(feature_{i} > {o_formulae[rule][1][i]}) ∧ '
                             # self.scale += 1
                     text = text[:-3] + '\n'
 

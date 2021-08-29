@@ -2,7 +2,6 @@ from Extractor import Extractor
 from Z3Process import Z3Process
 from FormulaeEstimator import FormulaeEstimator
 import numpy as np
-import copy
 from time import time
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
@@ -15,6 +14,12 @@ from sklearn.metrics import accuracy_score
 
 
 class Log:
+    """Logger for multi-processing.
+
+    Use pool.map(Log(func), **kwargs) and the detailed
+    error message will be printed out.
+    """
+
     def __init__(self, func):
         self.func = func
 
@@ -28,6 +33,8 @@ class Log:
 
 
 class MainProcess(object):
+    """Perform main process."""
+
     def __init__(self, clf, x_test, y_test, file, generation=10, scale=10, conjunction=False, acc_weight=0.5,
                  maxsat_on=True, tailor=True, fitness_func='Opt'):
         self._clf = clf                 # random forest
@@ -49,7 +56,7 @@ class MainProcess(object):
         offset = []
         r_num = []
         for each in params.T:
-            ex = copy.deepcopy(extractor)
+            ex = extractor.copy()
             _offset = 0
             phi = each[0]
             theta = each[1]
@@ -93,15 +100,13 @@ class MainProcess(object):
         return np.array(offset), np.array(r_num)
 
     def pso(self):
+        """Perform main process."""
         start_pso = time()
         np.set_printoptions(precision=3)
         print('---------------- P S O -----------------')
         self._file.write('---------------- P S O -----------------\n')
         ex = Extractor(self._clf)
-        ex.extract_forest_paths()
         ex.count_quality()
-
-        # ex.count_quality()
         #
         # self._quality, self._ig = ex.opt_get_quality()
         # ex.opt_clear_quality()
@@ -114,11 +119,6 @@ class MainProcess(object):
         max_gen = self._generation
         sizepop = self._scale
 
-        # v_min = [-0.1, -0.1, -0.1, -3]
-        # v_max = [0.1, 0.1, 0.1, 3]
-        # pop_min = [0, 0, 0.1, -2]
-        # pop_max = [1, 1, 1, 30]
-
         # speed constraints
         v_min = [-0.1, -0.1, -0.1, -3]
         v_max = [0.1, 0.1, 0.1, 3]
@@ -129,10 +129,12 @@ class MainProcess(object):
         # initialize the parameters
         np.random.seed(10)
         pop = np.zeros([4, sizepop])
-        pop[0] = np.random.uniform(0.1, 1, (1, sizepop))  # phi
-        pop[1] = np.random.uniform(0.1, 0.2, (1, sizepop))  # theta
-        pop[2] = np.random.uniform(0, 1, (1, sizepop))    # psi
-        pop[3] = np.random.uniform(1, 30, (1, sizepop))   # k
+        max_phi = ex.max_rule
+        max_theta = ex.max_node
+        pop[0] = np.random.uniform(0, max_phi, (1, sizepop))    # phi
+        pop[1] = np.random.uniform(0, max_theta, (1, sizepop))  # theta
+        pop[2] = np.random.uniform(0, 1, (1, sizepop))          # psi
+        pop[3] = np.random.uniform(1, 30, (1, sizepop))         # k
         if self._tailor is False:
             pop[3] = -1
 
@@ -140,7 +142,8 @@ class MainProcess(object):
         v = np.random.uniform(-0.1, 0.1, (4, sizepop)) * [[1], [1], [1], [30]]
 
         # do pso
-        offset, r_num = self.pso_function_parallel(ex, pop, RF_res)
+        # offset, r_num = self.pso_function_parallel(ex, pop, RF_res)  # parallel
+        offset, r_num = self.pso_function(ex, pop, RF_res)  # not parallel
 
         # compute fitness
         if self.fitness_func == 'Pro':
@@ -181,7 +184,8 @@ class MainProcess(object):
                 pop[3] = -1
 
             # iteration
-            offset, r_num = self.pso_function_parallel(ex, pop, RF_res)
+            # offset, r_num = self.pso_function_parallel(ex, pop, RF_res)  # parallel
+            offset, r_num = self.pso_function(ex, pop, RF_res)  # not parallel
 
             # compute fitness
             if self.fitness_func == 'Pro':
@@ -218,7 +222,7 @@ class MainProcess(object):
         return z_best
 
     def opt_fitness(self, offset, r_num):
-        # Eq (9)
+        """Eq 9."""
         acc = offset / len(self._X_test)
         # fo = self._acc_weight/(1 + np.exp(-10 * (acc - 0.5)))
         fo = self._acc_weight * acc
@@ -227,11 +231,12 @@ class MainProcess(object):
         return fo + fr
 
     def pro_fitness(self, g_num, r_num):
-        # Eq (10)
+        """Eq 10."""
         fitness = (self._clf.n_classes_ - g_num + 1) * r_num
         return fitness
 
     def explain(self, param, label='', auc_plot=False):
+        """Perform explanation."""
         print('---------------- Explanation -----------------')
         self._file.write('---------------- Explanation -----------------\n')
         phi = param[0]
@@ -241,7 +246,6 @@ class MainProcess(object):
 
         start1 = time()
         ex = Extractor(self._clf, phi, theta, psi)
-        ex.extract_forest_paths()
 
         ex.rule_filter()
 
@@ -347,13 +351,8 @@ class MainProcess(object):
 
 
 def func_parallel(extractor, _rf_res, maxsat_on, conjunction, classes, X_test, quality, ig, fitness_func, param):
-    # t0 = time()
-    # ex = copy.deepcopy(extractor)
-    # ex.opt_set_quality(quality, ig)
-    # t1 = time()         # plan A
-
     t0 = time()
-    ex = copy.deepcopy(extractor)
+    ex = extractor.copy()
     # ex.count_quality()
     t1 = time()  # Plan B
 

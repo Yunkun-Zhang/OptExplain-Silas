@@ -7,13 +7,12 @@ from silas import RFC
 from Main_Process import MainProcess
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model-path', default='model/diabetes/',
+    parser.add_argument('-m', '--model-path', default='model/flights/',
                         help='root of your Silas model')
-    parser.add_argument('-t', '--test-file', default='tests/clean-diabetes_test.csv',
+    parser.add_argument('-t', '--test-file', default='tests/clean-flights_test.csv',
                         help='path to your test file')
-    parser.add_argument('-p', '--prediction-file', default='tests/predictions_diabetes.csv',
+    parser.add_argument('-p', '--prediction-file', default='tests/predictions_flights.csv',
                         help='path to Silas-generated predictions.csv')
     parser.add_argument('--generation', type=int, default=20,
                         help='number of PSO iterations')
@@ -67,7 +66,5 @@ if __name__ == "__main__":
     m = MainProcess(clf, X_test, y_test, file, generation=generation, scale=scale, acc_weight=acc_weight,
                     conjunction=conjunction, maxsat_on=maxsat_on, tailor=size_filter, fitness_func='Opt')
     best_param = m.pso()
-    # best_param = [0.5, 0.6, 0.5, -1]
     m.explain(best_param, auc_plot=False)
-    file.write('end')
     file.close()

@@ -14,7 +14,6 @@ class Extractor(object):
           psi: Leaf merger to create class signature.
         """
         self._estimators = estimators       # random forest
-        self._forest_paths = []             # all forest paths
         self.scale = 0
         self._forest_formulae = []          # all paths after filter, each element with shape (2, n_feature)
                                             # representing min and max value
@@ -38,6 +37,19 @@ class Extractor(object):
         self.min_rule = 1
         self.min_node = 1
 
+    def copy(self):
+        """Provide a copy which does not keep filtered stuff."""
+        new_ex = Extractor(self._estimators)
+        new_ex.scale = self.scale
+        new_ex.n_original_leaves_num = self.n_original_leaves_num
+        new_ex._quality = self._quality
+        new_ex._ig = self._ig
+        new_ex.max_rule = self.max_rule
+        new_ex.min_rule = self.min_rule
+        new_ex.max_node = self.max_node
+        new_ex.min_node = self.min_node
+        return new_ex
+
     def set_param(self, phi, theta, psi):
         """Set all three parameters."""
         self._phi = phi
@@ -55,16 +67,6 @@ class Extractor(object):
     def opt_clear_quality(self):
         self._quality = []
         self._ig = []
-
-    def extract_tree_paths(self, estimator):
-        return estimator.rules
-
-    def extract_forest_paths(self):
-        for estimator in self._estimators:
-            paths = self.extract_tree_paths(estimator)
-            for path in paths:
-                self.scale += (len(path) - 1)
-            self._forest_paths.append(paths)
 
     def count_quality(self):
         _n_classes = self._estimators.n_classes_
@@ -115,24 +117,24 @@ class Extractor(object):
         formula = [[None for _ in range(self.n_features)] for _ in range(2)]  # store formula
         visited = np.zeros([2, self.n_features], dtype=float)  # record visiting state
 
-        rule = self._forest_paths[index][j]
+        rule = _tree[j]
         for k, node in enumerate(rule[:-1]):
             ig = self._ig[index][node]
 
             if ig >= self._theta:  # node filter: ig >= theta
-                fi = _feature[node]
+                f = _feature[node]
                 if _tree.children_left[node] == rule[k + 1]:
-                    if visited[0, fi] == 0:
-                        visited[0, fi] = 1
-                        formula[0][fi] = _threshold[node]
+                    if visited[0, f] == 0:
+                        visited[0, f] = 1
+                        formula[0][f] = _threshold[node]
                     else:
-                        formula[0][fi] = sub_f(_threshold[node], formula[0][fi])
+                        formula[0][f] = sub_f(_threshold[node], formula[0][f])
                 else:
-                    if visited[1, fi] == 0:
-                        visited[1, fi] = 1
-                        formula[1][fi] = _threshold[node]
+                    if visited[1, f] == 0:
+                        visited[1, f] = 1
+                        formula[1][f] = _threshold[node]
                     else:
-                        formula[1][fi] = add_f(_threshold[node], formula[1][fi])
+                        formula[1][f] = add_f(_threshold[node], formula[1][f])
 
         if not np.all(visited == 0):  # store the rule only if there are nodes other than leaf
             self._forest_values.append(_tree.value[rule[-1]])  # store leaf votes
