@@ -105,16 +105,16 @@ class MainProcess(object):
         np.set_printoptions(precision=3)
         print('---------------- P S O -----------------')
         self._file.write('---------------- P S O -----------------\n')
+
+        # initialize extractor
         ex = Extractor(self._clf)
         ex.count_quality()
-        #
-        # self._quality, self._ig = ex.opt_get_quality()
-        # ex.opt_clear_quality()
 
+        # some fixed parameters
         RF_res = self._clf.predict()
         sample_num = len(self._y_test) if self.fitness_func == 'Opt' else 1
-        w_max = 0.9
-        w_min = 0.4
+        w_max = 0.9  # inertia decrease from this
+        w_min = 0.4  # to this linearly
         c1, c2 = 1.6, 1.6  # learning factors
         max_gen = self._generation
         sizepop = self._scale

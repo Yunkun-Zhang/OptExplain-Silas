@@ -106,6 +106,7 @@ class FormulaeEstimator(object):
             file.write("conjuncts num:" + str(self.scale) + '\n')
 
     def classify_a_sample(self, x):
+        """Predict one instance by decision rules."""
         ans = np.zeros([len(self.groups_signature[0])])
         sat_g = []
         if self._conjunction is True:
@@ -144,7 +145,6 @@ class FormulaeEstimator(object):
                 if sample_num > 0:
                     ans += np.array(self.groups_signature[index]) * sample_num
                     sat_g.append(index)
-
         self.sat_group.append(sat_g)
         return ans
 
@@ -163,10 +163,9 @@ class FormulaeEstimator(object):
         return ans
 
     def classify_samples(self, x):
-        # classes = ['tested_negative', 'tested_positive']
+        """Predict the instances by decision rules."""
         if len(self.groups_formula) == 0 and self._conjunction is True:
             self._get_formulae()
-
         ans = []
         for sample in x:
             cls = self.classify_a_sample(sample)
@@ -175,6 +174,4 @@ class FormulaeEstimator(object):
                 ans.append(-1)
             else:
                 ans.append(self._classes[cls.argmax()])
-                # ans.append(cls.argmax())
-            # print(cls, ans[-1])
         return ans
