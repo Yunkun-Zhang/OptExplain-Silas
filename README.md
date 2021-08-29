@@ -1,6 +1,6 @@
 # OptExplain-Silas
 
-Re-implementation of [OptExplain](https://arxiv.org/abs/2103.02191) ([code](https://github.com/GreeenZhang/OptExplain)) based on Silas models
+Re-implementation of [OptExplain](https://arxiv.org/abs/2103.02191) ([code](https://github.com/GreeenZhang/OptExplain)) based on [Silas](https://www.depintel.com/) models.
 
 ## Running OptExplain
 
