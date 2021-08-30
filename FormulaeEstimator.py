@@ -1,6 +1,5 @@
 import numpy as np
 from silas import add_f, sub_f
-from tqdm import tqdm
 
 
 class FormulaeEstimator(object):
@@ -185,7 +184,7 @@ class FormulaeEstimator(object):
         if len(self.groups_formula) == 0 and self._conjunction is True:
             self._get_formulae()
         ans = []
-        for sample in tqdm(x):
+        for sample in x:
             cls = self.classify_a_sample(sample)
 
             if np.sum(cls == 0) == len(cls):
