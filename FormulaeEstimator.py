@@ -1,5 +1,6 @@
 import numpy as np
 from silas import add_f, sub_f
+from tqdm import tqdm
 
 
 class FormulaeEstimator(object):
@@ -68,9 +69,19 @@ class FormulaeEstimator(object):
                 text = ''
                 for i in range(self._n_features):
                     if self.visited[index][0][i] == 1:
-                        text += f'(feature_{i} <= {formula[0][i]}) ∧ '
+                        f = formula[0][i]
+                        if f.type == 'numeric':
+                            text += f'(feature_{i} <= {f.value}) ∧ '
+                        else:
+                            text += f'(feature_{i} in ' \
+                                    f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
                     if self.visited[index][1][i] == 1:
-                        text += f'(feature_{i} > {formula[1][i]}) ∧ '
+                        f = formula[1][i]
+                        if f.type == 'numeric':
+                            text += f'(feature_{i} > {f.value}) ∧ '
+                        else:
+                            text += f'(feature_{i} not in ' \
+                                    f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
                 text = text[:-2]
                 title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
                         f'{len(self._groups[index][1]):>2} rules | {self._groups[index][0]}'
@@ -78,7 +89,6 @@ class FormulaeEstimator(object):
                 print(text)
                 file.write(title + '\n')
                 file.write(text + '\n')
-            # print("signatures:", self.groups_signature)
         else:
             self._get_formulae()
             o_formulae = self._z3processor.formulae
@@ -89,11 +99,19 @@ class FormulaeEstimator(object):
                     text += f'{self.group_weights[index][r]:>15.0f} samples\t'
                     for i in range(self._n_features):
                         if o_visited[rule][0][i] == 1:
-                            text += f'(feature_{i} <= {o_formulae[rule][0][i]}) ∧ '
-                            # self.scale += 1
+                            f = o_formulae[rule][0][i]
+                            if f.type == 'numeric':
+                                text += f'(feature_{i} <= {f.value}) ∧ '
+                            else:
+                                text += f'(feature_{i} in ' \
+                                        f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
                         if o_visited[rule][1][i] == 1:
-                            text += f'(feature_{i} > {o_formulae[rule][1][i]}) ∧ '
-                            # self.scale += 1
+                            f = o_formulae[rule][1][i]
+                            if f.type == 'numeric':
+                                text += f'(feature_{i} > {f.value}) ∧ '
+                            else:
+                                text += f'(feature_{i} not in ' \
+                                        f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
                     text = text[:-3] + '\n'
 
                 title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
@@ -167,7 +185,7 @@ class FormulaeEstimator(object):
         if len(self.groups_formula) == 0 and self._conjunction is True:
             self._get_formulae()
         ans = []
-        for sample in x:
+        for sample in tqdm(x):
             cls = self.classify_a_sample(sample)
 
             if np.sum(cls == 0) == len(cls):
