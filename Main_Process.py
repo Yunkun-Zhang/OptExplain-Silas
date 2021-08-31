@@ -40,7 +40,7 @@ class MainProcess(object):
         self._clf = clf                 # random forest
         self._X_test = x_test
         self._y_test = y_test
-        self._nfeature = x_test.shape[1]
+        self._nfeature = clf.n_features_
         self._acc_weight = acc_weight   # weight of acc in fitness function
         self._scale = scale             # number of particles
         self._generation = generation   # number of iterations

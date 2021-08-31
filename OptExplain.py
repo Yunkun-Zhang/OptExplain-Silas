@@ -1,6 +1,6 @@
 import os
+import json
 import argparse
-import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from silas import RFC
@@ -32,9 +32,6 @@ if __name__ == "__main__":
     test_file = args['test_file']
     pf = args['prediction_file']
 
-    # n_estimators = 100  # number of trees
-    # max_depth = 10  # max-depth of each tree
-
     generation = args['generation']
     scale = args['scale']
     acc_weight = args['acc_weight']
@@ -42,12 +39,25 @@ if __name__ == "__main__":
     maxsat_on = args['max_sat']
     size_filter = not args['no_tailor']
 
-    # read the test data
+    # read the test data and adjust data type
+    with open(os.path.join(model_path, 'settings.json')) as f:
+        settings = json.load(f)
+    with open(os.path.join(model_path, 'metadata.json')) as f:
+        metadata = json.load(f)
+    label = settings['output-feature']
     test_data = pd.read_csv(test_file)
-    X_test = np.array(test_data.iloc[:, 0:-1])
-    y_test = np.array(test_data.iloc[:, -1])
+    columns = list(test_data.columns)
+    label_column = columns.index(label)
+    test_data = test_data.values.tolist()
+    for i, f in enumerate(metadata['attributes']):
+        if f['type'] == 'nominal':
+            for sample in range(len(test_data)):
+                test_data[sample][i] = str(test_data[sample][i])
+    X_test = [sample[:label_column] + sample[label_column + 1:] for sample in test_data]
+    y_test = [sample[label_column] for sample in test_data]
 
-    print('RF...')
+    # create random forest from Silas
+    print('RF...', end='\r')
     clf = RFC(model_path, pf)
     print('RF acc:', accuracy_score(y_test, clf.predict()))
 
@@ -58,7 +68,6 @@ if __name__ == "__main__":
     while os.path.exists(f'explanation/{file_num}.txt') is True:
         file_num += 1
     file = open(f'explanation/{file_num}.txt', 'w')
-    # file.write(f'n_estimators = {n_estimators}\tmax_depth = {max_depth}\n')
     file.write('generation = {}\tscale = {}\tacc_weight = {}\tmaxsat = {}\ttailor = {}\n'.
                format(generation, scale, acc_weight, maxsat_on, size_filter))
     print('explain...')

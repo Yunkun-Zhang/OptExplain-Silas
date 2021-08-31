@@ -73,14 +73,14 @@ class FormulaeEstimator(object):
                             text += f'(feature_{i} <= {f.value}) ∧ '
                         else:
                             text += f'(feature_{i} in ' \
-                                    f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
+                                    f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                     if self.visited[index][1][i] == 1:
                         f = formula[1][i]
                         if f.type == 'numeric':
                             text += f'(feature_{i} > {f.value}) ∧ '
                         else:
                             text += f'(feature_{i} not in ' \
-                                    f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
+                                    f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                 text = text[:-2]
                 title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \
                         f'{len(self._groups[index][1]):>2} rules | {self._groups[index][0]}'
@@ -103,14 +103,14 @@ class FormulaeEstimator(object):
                                 text += f'(feature_{i} <= {f.value}) ∧ '
                             else:
                                 text += f'(feature_{i} in ' \
-                                        f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
+                                        f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                         if o_visited[rule][1][i] == 1:
                             f = o_formulae[rule][1][i]
                             if f.type == 'numeric':
                                 text += f'(feature_{i} > {f.value}) ∧ '
                             else:
                                 text += f'(feature_{i} not in ' \
-                                        f'{[self.values[i][j] for j in range(len(self.values)) if f.value[j]]}) ∧ '
+                                        f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                     text = text[:-3] + '\n'
 
                 title = f'Group {index:>2}: | {sum(self.group_weights[index]):>3.0f} samples | ' \

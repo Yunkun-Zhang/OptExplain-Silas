@@ -14,7 +14,7 @@ class Extractor(object):
           psi: Leaf merger to create class signature.
         """
         self._estimators = estimators       # random forest
-        self.scale = 0
+        self.scale = sum([sum([len(rule) for rule in tree]) for tree in estimators])
         self._forest_formulae = []          # all paths after filter, each element with shape (2, n_feature)
                                             # representing min and max value
         self._forest_formulae_visited = []  # all visited rules

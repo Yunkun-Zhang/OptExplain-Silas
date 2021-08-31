@@ -81,7 +81,12 @@ class DT:
                 self.rules.append(rule[:])
                 value = np.array(d['aggregate'])
                 prob = value / value.sum()
-                self.ig[number] = -(prob * np.log2(prob)).sum() if prob[0] != 0 and prob[1] != 0 else 0
+                # calculate entropy
+                entropy = 0
+                for p in prob:
+                    if p != 0:
+                        entropy -= p * np.log2(p)
+                self.ig[number] = entropy
             else:
                 self.feature[number] = index[d['featureIndex']]
                 self.children_left[number], value1 = dfs(d['left'])
@@ -116,24 +121,34 @@ class RFC:
             summary = json.load(f)
         with open(os.path.join(model_path, 'metadata.json'), 'r') as f:
             metadata = json.load(f)
+        with open(os.path.join(model_path, 'settings.json'), 'r') as f:
+            settings = json.load(f)
+        label = settings['output-feature']
 
         # for nominal feature method 'satisfy'
         dic = {f['name']: f for f in metadata['attributes']}
-        self.nominal_features = [dic[f['attribute-name']]['values'] if 'values' in dic[f['attribute-name']]
-                                 else None for f in metadata['features']]
+        self.nominal_features = []
+        for f in metadata['features']:
+            if f['attribute-name'] == label:
+                continue
+            if 'values' in dic[f['attribute-name']]:
+                self.nominal_features.append(dic[f['attribute-name']]['values'])
+            else:
+                self.nominal_features.append(None)
 
-        # features are ordered according to metadata / test set
+        # features are ordered according to metadata
         features = [a['feature-name'] for a in metadata['features']]
-        self.features_ = features[:-1]
-        self.output_feature_ = features[-1]
+        label_column = features.index(label)
+        self.features_ = features[:label_column] + features[label_column + 1:]
+        self.output_feature_ = label
 
         # revise featureIndex in tree nodes
-        self.feature_indices = [features.index(f) for f in summary['template']]
+        self.feature_indices = [self.features_.index(f) for f in summary['template']]
 
         self.n_estimators = summary['size']
         self.classes_ = summary['output-labels']
-        self.n_classes_ = len(summary['output-labels'])
-        self.n_features_ = len(summary['template'])
+        self.n_classes_ = len(self.classes_)
+        self.n_features_ = len(self.features_)
         self.n_outputs_ = 1
         self.trees_ = []
         self.trees_oob_scores = []
@@ -165,5 +180,6 @@ class RFC:
     def predict(self):
         """Predict class for each input instance."""
         prob = self.predict_proba()
-        pred = [self.classes_[0] if x[0] > x[1] else self.classes_[1] for x in prob]
+        cls = np.argmax(prob, axis=-1)
+        pred = [self.classes_[c] for c in cls]
         return np.array(pred)

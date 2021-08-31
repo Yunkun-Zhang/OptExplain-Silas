@@ -16,7 +16,8 @@ Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplai
     ```shell
     python OptExplain.py -m model_path -t test_file -p prediction_file
     ```
-
+   NOTE: Silas model path must also contain file `settings.json` used to learn the model.
+   
     Other options include
 
     - `--generation` controls the number of PSO iterations.
@@ -29,3 +30,5 @@ Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplai
 ### Outputs
 
 OptExplain will print the results as well as save them as a file in `explanation/`.
+
+NOTE: Please ensure that the order of features in the training/testing data file matches the order of features in the metadata file.
