@@ -107,7 +107,7 @@ class DT:
 class RFC:
     """Random forest classifier."""
 
-    def __init__(self, model_path='', pred_file='predictions.csv') -> None:
+    def __init__(self, model_path='', pred_file='predictions.csv', label_column=None) -> None:
         """Build a random forest classifier.
 
         Args:
@@ -121,9 +121,10 @@ class RFC:
             summary = json.load(f)
         with open(os.path.join(model_path, 'metadata.json'), 'r') as f:
             metadata = json.load(f)
-        with open(os.path.join(model_path, 'settings.json'), 'r') as f:
-            settings = json.load(f)
-        label = settings['output-feature']
+
+        if label_column is None:
+            label_column = len(metadata['features'])
+        label = metadata['features'][label_column]['feature-name']
 
         # for nominal feature method 'satisfy'
         dic = {f['name']: f for f in metadata['attributes']}

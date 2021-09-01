@@ -40,14 +40,16 @@ if __name__ == "__main__":
     size_filter = not args['no_tailor']
 
     # read the test data and adjust data type
-    with open(os.path.join(model_path, 'settings.json')) as f:
-        settings = json.load(f)
     with open(os.path.join(model_path, 'metadata.json')) as f:
         metadata = json.load(f)
-    label = settings['output-feature']
     test_data = pd.read_csv(test_file)
     columns = list(test_data.columns)
-    label_column = columns.index(label)
+    if os.path.exists(os.path.join(model_path, 'settings.json')):
+        with open(os.path.join(model_path, 'settings.json')) as f:
+            settings = json.load(f)
+        label_column = columns.index(settings['output-feature'])
+    else:
+        label_column = len(columns) - 1
     test_data = test_data.values.tolist()
     for i, f in enumerate(metadata['attributes']):
         if f['type'] == 'nominal':
@@ -58,7 +60,7 @@ if __name__ == "__main__":
 
     # create random forest from Silas
     print('RF...', end='\r')
-    clf = RFC(model_path, pf)
+    clf = RFC(model_path, pred_file=pf, label_column=label_column)
     print('RF acc:', accuracy_score(y_test, clf.predict()))
 
     # output

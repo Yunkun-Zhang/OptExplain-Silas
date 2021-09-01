@@ -16,7 +16,7 @@ Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplai
     ```shell
     python OptExplain.py -m model_path -t test_file -p prediction_file
     ```
-   NOTE: Silas model path must also contain file `settings.json` used to learn the model.
+   NOTE: Label of test data is the last column by default. If not, `settings.json` used to learn the model should be put under model path to specify the label column.
    
     Other options include
 
