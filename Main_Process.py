@@ -1,16 +1,15 @@
-from Extractor import Extractor
-from Z3Process import Z3Process
-from FormulaeEstimator import FormulaeEstimator
+import traceback
 import numpy as np
+import matplotlib.pyplot as plt
 from time import time
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
-import matplotlib.pyplot as plt
-import multiprocessing
-from multiprocessing import Pool
-import traceback
-from functools import partial
 from sklearn.metrics import accuracy_score
+from functools import partial
+from multiprocessing import Pool, get_logger
+from Extractor import Extractor
+from Z3Process import Z3Process
+from FormulaeEstimator import FormulaeEstimator
 
 
 class Log:
@@ -27,7 +26,7 @@ class Log:
         try:
             result = self.func(*args, **kwargs)
         except Exception as e:
-            multiprocessing.get_logger().error(traceback.format_exc())
+            get_logger().error(traceback.format_exc())
             raise
         return result
 
