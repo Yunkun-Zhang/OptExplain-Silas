@@ -89,8 +89,12 @@ class DT:
                 self.ig[number] = entropy
             else:
                 self.feature[number] = index[d['featureIndex']]
-                self.children_left[number], value1 = dfs(d['left'])
-                self.children_right[number], value2 = dfs(d['right'])
+                if 'threshold' in d:
+                    self.children_left[number], value1 = dfs(d['left'])
+                    self.children_right[number], value2 = dfs(d['right'])
+                else:
+                    self.children_left[number], value1 = dfs(d['right'])
+                    self.children_right[number], value2 = dfs(d['left'])
                 value = value1 + value2
                 self.ig[number] = d['weight']
                 self.threshold[number] = Feature(d['threshold'] if 'threshold' in d else d['partition'])

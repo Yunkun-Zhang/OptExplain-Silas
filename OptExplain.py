@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # adjust data type
     for i, f in enumerate(metadata['attributes']):
-        if f['type'] == 'nominal' and type(test_data[0][i]) != str:
+        if f['type'] == 'nominal' and type(test_data[0][i]) in [float, int]:
             for sample in range(len(test_data)):
                 values = str(test_data[sample][i]).split('e')
                 if len(values) == 1:
