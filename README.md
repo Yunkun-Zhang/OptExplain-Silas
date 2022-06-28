@@ -27,6 +27,8 @@ Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplai
     ```shell
     python modify_metadata.py metadata_file -r round_number -l label_column
     ```
+
+   (You should modify `ROUND_NUMBER` in `OptExplain.py` to match round_number here.)
    
     This will replace metadata_file, and it should be under Silas model path before running OptExplain.
 
