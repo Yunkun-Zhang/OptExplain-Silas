@@ -130,14 +130,20 @@ class FormulaeEstimator(object):
             for index, formula in enumerate(self.groups_formula):
                 sat = True
                 for feature in range(self._n_features):
-                    if self.visited[index][0][feature] == 1 and \
-                            not formula[0][feature].satisfy(x[feature], self.values[feature]):
-                        sat = False
-                        break
-                    if self.visited[index][1][feature] == 1 and \
-                            formula[1][feature].satisfy(x[feature], self.values[feature]):
-                        sat = False
-                        break
+                    try:
+                        if self.visited[index][0][feature] == 1 and \
+                                not formula[0][feature].satisfy(x[feature], self.values[feature]):
+                            sat = False
+                            break
+                        if self.visited[index][1][feature] == 1 and \
+                                formula[1][feature].satisfy(x[feature], self.values[feature]):
+                            sat = False
+                            break
+                    except ValueError:
+                        raise Warning(
+                            f'please check the type consistency of feature {feature} '
+                            f'in test data and metadata'
+                        )
                 if sat is True:
                     ans += np.array(self.groups_signature[index]) * sum(self.group_weights[index])
                     sat_g.append(index)
@@ -149,14 +155,20 @@ class FormulaeEstimator(object):
                 for r, rule in enumerate(group[1]):
                     sat = True
                     for feature in range(self._n_features):
-                        if o_visited[rule][0][feature] == 1 and \
-                                not o_formulae[rule][0][feature].satisfy(x[feature], self.values[feature]):
-                            sat = False
-                            break
-                        if o_visited[rule][1][feature] == 1 and \
-                                o_formulae[rule][1][feature].satisfy(x[feature], self.values[feature]):
-                            sat = False
-                            break
+                        try:
+                            if o_visited[rule][0][feature] == 1 and \
+                                    not o_formulae[rule][0][feature].satisfy(x[feature], self.values[feature]):
+                                sat = False
+                                break
+                            if o_visited[rule][1][feature] == 1 and \
+                                    o_formulae[rule][1][feature].satisfy(x[feature], self.values[feature]):
+                                sat = False
+                                break
+                        except ValueError:
+                            raise Warning(
+                                f'please check the type consistency of feature {feature} '
+                                f'in test data and metadata'
+                            )
                     if sat is True:
                         sample_num += self.group_weights[index][r]
                 if sample_num > 0:
