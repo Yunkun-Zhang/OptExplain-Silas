@@ -182,9 +182,10 @@ class RFC:
         prob = pd.read_csv(self.pred_file).values.tolist()
         return np.array(prob)
 
-    def predict(self):
+    def predict(self, use_cls_names=False):
         """Predict class for each input instance."""
         prob = self.predict_proba()
         cls = np.argmax(prob, axis=-1)
-        pred = [self.classes_[c] for c in cls]
-        return np.array(pred)
+        if use_cls_names:
+            cls = [self.classes_[c] for c in cls]
+        return np.array(cls)

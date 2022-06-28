@@ -70,14 +70,14 @@ class FormulaeEstimator(object):
                     if self.visited[index][0][i] == 1:
                         f = formula[0][i]
                         if f.type == 'numeric':
-                            text += f'(feature_{i} <= {f.value}) ∧ '
+                            text += f'(feature_{i} <= {f.value:.3f}) ∧ '
                         else:
                             text += f'(feature_{i} in ' \
                                     f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                     if self.visited[index][1][i] == 1:
                         f = formula[1][i]
                         if f.type == 'numeric':
-                            text += f'(feature_{i} > {f.value}) ∧ '
+                            text += f'(feature_{i} > {f.value:.3f}) ∧ '
                         else:
                             text += f'(feature_{i} not in ' \
                                     f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
@@ -100,14 +100,14 @@ class FormulaeEstimator(object):
                         if o_visited[rule][0][i] == 1:
                             f = o_formulae[rule][0][i]
                             if f.type == 'numeric':
-                                text += f'(feature_{i} <= {f.value}) ∧ '
+                                text += f'(feature_{i} <= {f.value:.3f}) ∧ '
                             else:
                                 text += f'(feature_{i} in ' \
                                         f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
                         if o_visited[rule][1][i] == 1:
                             f = o_formulae[rule][1][i]
                             if f.type == 'numeric':
-                                text += f'(feature_{i} > {f.value}) ∧ '
+                                text += f'(feature_{i} > {f.value:.3f}) ∧ '
                             else:
                                 text += f'(feature_{i} not in ' \
                                         f'{[v for j, v in enumerate(self.values[i]) if f.value[j]]}) ∧ '
@@ -190,5 +190,5 @@ class FormulaeEstimator(object):
             if np.sum(cls == 0) == len(cls):
                 ans.append(-1)
             else:
-                ans.append(self._classes[cls.argmax()])
+                ans.append(cls.argmax())
         return ans

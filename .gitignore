@@ -1,4 +1,5 @@
 /model/
 /explanation/
 /tests/
-/unused.py
+/data/
+.idea

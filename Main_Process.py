@@ -38,7 +38,7 @@ class MainProcess(object):
                  maxsat_on=True, tailor=True, fitness_func='Opt'):
         self._clf = clf                 # random forest
         self._X_test = x_test
-        self._y_test = y_test
+        self._y_test = y_test if not isinstance(y_test[0], bool) else [str(y) for y in y_test]
         self._nfeature = clf.n_features_
         self._acc_weight = acc_weight   # weight of acc in fitness function
         self._scale = scale             # number of particles
@@ -303,14 +303,11 @@ class MainProcess(object):
             elif len(each) == 0:
                 no_ans += 1
 
-        if label == '':
-            label = self._clf.classes_[1]  # true
-
-        fpr, tpr, thresholds = roc_curve(self._y_test, self._clf.predict_proba()[:, 1], pos_label=label)
+        fpr, tpr, thresholds = roc_curve(self._y_test, self._clf.predict())
         ori_auc = auc(fpr, tpr)
 
         ex_test = f.classify_samples_values(self._X_test)
-        efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1], pos_label=label)
+        efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1])
         ex_auc = auc(efpr, etpr)
 
         print(f'Sample size:     {len(self._y_test)}')

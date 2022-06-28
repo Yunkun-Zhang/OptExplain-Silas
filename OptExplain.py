@@ -6,13 +6,15 @@ from sklearn.metrics import accuracy_score
 from silas import RFC
 from Main_Process import MainProcess
 
+ROUND_NUMBER = 6
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model-path', default='model/flights',
+    parser.add_argument('-m', '--model-path', default='model/heart',
                         help='root of your Silas model')
-    parser.add_argument('-t', '--test-file', default='tests/clean-flights_test.csv',
+    parser.add_argument('-t', '--test-file', default='tests/heart.csv',
                         help='path to your test file')
-    parser.add_argument('-p', '--prediction-file', default='tests/predictions_flights.csv',
+    parser.add_argument('-p', '--prediction-file', default='tests/predictions_heart.csv',
                         help='path to Silas-generated predictions.csv')
     parser.add_argument('--generation', type=int, default=20,
                         help='number of PSO iterations')
@@ -54,20 +56,24 @@ if __name__ == "__main__":
 
     # adjust data type
     for i, f in enumerate(metadata['attributes']):
-        if f['type'] == 'nominal' and type(test_data[0][i]) in [float, int]:
-            for sample in range(len(test_data)):
-                values = str(test_data[sample][i]).split('e')
-                if len(values) == 1:
-                    test_data[sample][i] = str(round(test_data[sample][i], 15))
-                else:
-                    n = 14 - int(values[-1])
-                    test_data[sample][i] = str(round(test_data[sample][i], n)).upper()
+        if f['type'] == 'nominal' and isinstance(test_data[0][i], (float, int)):
+            for j, sample in enumerate(test_data):
+                test_data[j][i] = str(round(float(sample[i]), ROUND_NUMBER))
     X_test = [sample[:label_column] + sample[label_column + 1:] for sample in test_data]
-    y_test = [sample[label_column] for sample in test_data]
 
     # create random forest from Silas
     print('RF...', end='\r')
     clf = RFC(model_path, pred_file=pf, label_column=label_column)
+    y_test = []
+    for sample in test_data:
+        y = sample[label_column]
+        try:
+            y = float(y)
+        except ValueError:
+            pass
+        if isinstance(y, int) or (isinstance(y, float) and y.is_integer()):
+            y = str(int(y))
+        y_test.append(clf.classes_.index(y))  # int labels
     print('RF acc:', accuracy_score(y_test, clf.predict()))
 
     # output
