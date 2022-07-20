@@ -50,7 +50,8 @@ def sub_f(f1: Feature, f2: Feature) -> Feature:
 class DT:
     """Decision tree."""
 
-    def __init__(self):
+    def __init__(self, n_classes_: int = None):
+        self.n_classes_ = n_classes_
         self.oob_score = 0
         self.count = 0              # number of nodes
         self.feature = []           # feature indices at each node
@@ -87,6 +88,10 @@ class DT:
                     if p != 0:
                         entropy -= p * np.log2(p)
                 self.ig[number] = entropy
+            elif 'value' in d:
+                # one-hot value, entropy=0
+                value = np.zeros(self.n_classes_ or 2)
+                value[d['value']] = 1
             else:
                 self.feature[number] = index[d['featureIndex']]
                 if 'threshold' in d:
@@ -96,7 +101,7 @@ class DT:
                     self.children_left[number], value1 = dfs(d['right'])
                     self.children_right[number], value2 = dfs(d['left'])
                 value = value1 + value2
-                self.ig[number] = d['weight']
+                self.ig[number] = d.get('weight') or .1
                 self.threshold[number] = Feature(d['threshold'] if 'threshold' in d else d['partition'])
             rule.pop()
             self.value[number] = value

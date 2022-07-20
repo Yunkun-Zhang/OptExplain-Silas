@@ -1,4 +1,4 @@
-# OptExplain-Silas
+mk # OptExplain-Silas
 
 Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplain), [arXiv](https://arxiv.org/abs/2103.02191), [bibtex](https://dblp.org/rec/journals/corr/abs-2103-02191.html?view=bibtex)) based on [Silas](https://www.depintel.com/) models.
 
@@ -33,6 +33,8 @@ Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplai
     This will replace metadata_file, and it should be under Silas model path before running OptExplain.
 
 3. Ensure that the order of features in the training/testing data file matches the order of features in the metadata file.
+
+4. If the trees do not have the key `weight` for some non-leaf node, the information gain of that node will be set to `0.1`. This can cause unexpected results.
 
 ### Running
 
