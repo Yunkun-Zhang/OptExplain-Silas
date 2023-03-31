@@ -71,8 +71,15 @@ if __name__ == "__main__":
             y = float(y)
         except ValueError:
             pass
-        if isinstance(y, int) or (isinstance(y, float) and y.is_integer()):
+
+        # Zhe modified the below on 30/03/2023. Original code:
+        # if isinstance(y, int) or (isinstance(y, float) and y.is_integer()):
+        #     y = str(int(y))
+        if isinstance(y, int) or (isinstance(y, float) and y.is_integer() and str(int(y)) in clf.classes_):
             y = str(int(y))
+        elif str(y) in clf.classes_:
+            y = str(y)
+
         y_test.append(clf.classes_.index(y))  # int labels
     print('RF acc:', accuracy_score(y_test, clf.predict()))
 
