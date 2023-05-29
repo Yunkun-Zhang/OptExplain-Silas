@@ -54,9 +54,9 @@ if __name__ == "__main__":
         label_column = len(columns) - 1
     test_data = test_data.values.tolist()
 
-    # adjust data type
+    ## adjust data type
     for i, f in enumerate(metadata['attributes']):
-        if f['type'] == 'nominal' and isinstance(test_data[0][i], (float, int)):
+        if f['type'] == 'nominal' and isinstance(test_data[0][i], (float, int)) and i != label_column:
             for j, sample in enumerate(test_data):
                 test_data[j][i] = str(round(float(sample[i]), ROUND_NUMBER))
     X_test = [sample[:label_column] + sample[label_column + 1:] for sample in test_data]
@@ -66,19 +66,24 @@ if __name__ == "__main__":
     clf = RFC(model_path, pred_file=pf, label_column=label_column)
     y_test = []
     for sample in test_data:
-        y = sample[label_column]
-        try:
-            y = float(y)
-        except ValueError:
-            pass
+        y = sample[label_column]        
 
         # Zhe modified the below on 30/03/2023. Original code:
         # if isinstance(y, int) or (isinstance(y, float) and y.is_integer()):
         #     y = str(int(y))
-        if isinstance(y, int) or (isinstance(y, float) and y.is_integer() and str(int(y)) in clf.classes_):
-            y = str(int(y))
-        elif str(y) in clf.classes_:
+
+        if isinstance(y, bool):
             y = str(y)
+        else:
+            try:
+                y = float(y)
+            except ValueError:
+                pass
+
+        if isinstance(y, int) or (isinstance(y, float) and y.is_integer() and str(int(y)) in clf.classes_):
+            y = str(int(y))   
+        elif str(y) in clf.classes_:
+            y = str(y)    
 
         y_test.append(clf.classes_.index(y))  # int labels
     print('RF acc:', accuracy_score(y_test, clf.predict()))

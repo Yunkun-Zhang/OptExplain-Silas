@@ -28,9 +28,18 @@ class Feature:
           f <= feature or f ∈ feature.
         """
         if self.type == 'numeric':
-            return f <= self.value
+            return float(f) <= float(self.value)
         else:
-            return self.value[values.index(f)]
+            if float(f) in values:
+                return self.value[values.index(float(f))]
+            elif int(float(f)) in values:
+                return self.value[values.index(int(float(f)))]
+            elif str(float(f)) in values:
+                return self.value[values.index(str(float(f)))]
+            elif str(int(float(f))) in values:
+                return self.value[values.index(str(int(float(f))))]
+            else:
+                raise ValueError('The type of f does not match that of values.')
 
 
 def add_f(f1: Feature, f2: Feature) -> Feature:

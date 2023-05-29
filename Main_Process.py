@@ -303,12 +303,12 @@ class MainProcess(object):
             elif len(each) == 0:
                 no_ans += 1
 
-        fpr, tpr, thresholds = roc_curve(self._y_test, self._clf.predict())
-        ori_auc = auc(fpr, tpr)
+        #fpr, tpr, thresholds = roc_curve(self._y_test, self._clf.predict())
+        #ori_auc = auc(fpr, tpr)
 
         ex_test = f.classify_samples_values(self._X_test)
-        efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1])
-        ex_auc = auc(efpr, etpr)
+        #efpr, etpr, ethresholds = roc_curve(self._y_test, ex_test[:, 1])
+        #ex_auc = auc(efpr, etpr)
 
         print(f'Sample size:     {len(self._y_test)}')
         self._file.write(f'Sample size:     {len(self._y_test)}\n')
@@ -316,14 +316,14 @@ class MainProcess(object):
         print(f'RF accuracy:     {RF_accuracy}')
         self._file.write(f'RF accuracy:     {RF_accuracy}\n')
 
-        print(f'RF AUC:          {ori_auc}')
-        self._file.write(f'RF AUC:          {ori_auc:.2f}\n')
+        #print(f'RF AUC:          {ori_auc}')
+        #self._file.write(f'RF AUC:          {ori_auc:.2f}\n')
 
         print(f'EX accuracy:     {EX_accuracy}')
         self._file.write(f'EX accuracy:     {EX_accuracy}\n')
 
-        print(f'EX AUC:          {ex_auc}')
-        self._file.write(f'EX AUC:          {ex_auc:.2f}\n')
+        #print(f'EX AUC:          {ex_auc}')
+        #self._file.write(f'EX AUC:          {ex_auc:.2f}\n')
 
         print(f'Coverage:        {(len(self._y_test) - no_ans) / len(self._y_test)}')
         self._file.write(f'Coverage:        {(len(self._y_test) - no_ans) / len(self._y_test)}\n')
@@ -335,15 +335,15 @@ class MainProcess(object):
         self._file.write(f'*Performance:    {performance}\n')
 
         # plot the results
-        if auc_plot is True:
-            plt.plot(fpr, tpr, linewidth=2, label="RF ROC curve (area = {:.2f})".format(ori_auc))
-            plt.plot(efpr, etpr, linewidth=2, label="Explain ROC curve (area = {:.2f})".format(ex_auc))
-            plt.xlabel("false positive rate")
-            plt.ylabel("true positive rate")
-            plt.ylim(0, 1.05)
-            plt.xlim(0, 1.05)
-            plt.legend(loc=4)
-            plt.show()
+       # if auc_plot is True:
+       #     plt.plot(fpr, tpr, linewidth=2, label="RF ROC curve (area = {:.2f})".format(ori_auc))
+       #     plt.plot(efpr, etpr, linewidth=2, label="Explain ROC curve (area = {:.2f})".format(ex_auc))
+       #     plt.xlabel("false positive rate")
+       #     plt.ylabel("true positive rate")
+       #     plt.ylim(0, 1.05)
+       #     plt.xlim(0, 1.05)
+       #     plt.legend(loc=4)
+       #     plt.show()
 
 
 def func_parallel(extractor, _rf_res, maxsat_on, conjunction, classes, X_test, quality, ig, fitness_func, param):

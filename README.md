@@ -1,4 +1,4 @@
-mk # OptExplain-Silas
+# OptExplain-Silas
 
 Re-implementation of OptExplain ([code](https://github.com/GreeenZhang/OptExplain), [arXiv](https://arxiv.org/abs/2103.02191), [bibtex](https://dblp.org/rec/journals/corr/abs-2103-02191.html?view=bibtex)) based on [Silas](https://www.depintel.com/) models.
 
